@@ -154,7 +154,7 @@ def run_code():
     payload = {}
     headers = {"redirect_uri": "google.com", "User-Agent": "Mozilla/5.0"}
     r = requests.request("GET", chart_image_url, headers=headers, data=payload)
-    file = open("./images/daily_vix_normal.png", "wb")
+    file = open("image.png", "wb")
     file.write(r.content)
     file.close()
     chart_image = r.content
