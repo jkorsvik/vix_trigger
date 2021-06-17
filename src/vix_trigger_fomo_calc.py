@@ -1,18 +1,73 @@
 import pandas as pd
 import datetime
 import yfinance as yf
-from vix_trigger_streamlit import isCurrentHigherThanOpen, isCurrentLowerThanOpen, isNewHigh, isNewLow
 
 # Select from to which date you want to see what you could have made/lost
 # NB! Can not be today's date, and it will require some processing power with dates
 # far away from each other
-start_date = '2021-01-01'
-end_date = '2021-06-16'
+start_date = '2021-01-28'
+end_date = '2021-02-11'
 # Do not change these two
 days_back = 15
 SYMBOL = 'VIX'
 # Choose the stock you want to compare the vix trigger with (ticker)
 stock_symbol = "TSLA"
+
+
+def isNewHigh(high, data):
+    """
+    Returns True if the 'high' is higher than any of the highs in the data
+    array passed in. Otherwise returns False
+    Parameters:
+    high (float): Today's highest price for the VIX index
+    data (list): All price data for the VIX index 15 days back
+    """
+    highs = data.get("High")
+    for i in highs:
+        try:
+            if (float(i)) >= float(high):
+                return False
+        except ValueError:
+            return False
+    return True
+
+
+def isNewLow(low, data):
+    """
+    Returns True if the 'low' is lower than any of the lows in the data
+    array passed in. Otherwise returns False
+    Parameters:
+    low (float): Today's lowest price for the VIX index
+    data (list): All price data for the VIX index 15 days back
+    """
+    lows = data.get("Low")
+    for i in lows:
+        try:
+            if float(i) <= float(low):
+                return False
+        except ValueError:
+            return False
+    return True
+
+
+def isCurrentHigherThanOpen(current, today_open):
+    """
+    Simple check to see if the current price is greater than the open price
+    Parameters:
+    current (float): The current price for the VIX index
+    open (float): Today's opening price
+    """
+    return float(current) > float(today_open)
+
+
+def isCurrentLowerThanOpen(current, today_open):
+    """
+    Simple check to see if the current price is lower than the open price
+    Parameters:
+    current (float): The current price for the VIX index
+    open (float): Today's opening price
+    """
+    return float(current) < float(today_open)
 
 
 def vix_trigger():
@@ -177,8 +232,8 @@ for key in stock_close:
 
 # Print out what the user could have made/lost if they followed the vix trigger
 if sum(profit) > 0:
-    print(f'If you followed the VIX index trigger you would have made {sum(profit)}$')
+    print(f'If you followed the VIX index trigger you would have made {sum(profit):.2f}$')
 elif sum(profit) == 0:
-    print(f'You would have broken even if you followed the vix index trigger {sum(profit)}$')
+    print(f'You would have broken even if you followed the vix index trigger {sum(profit):.2f}$')
 else:
-    print(f'If you followed the VIX index trigger you would have lost {sum(profit)}$')
+    print(f'If you followed the VIX index trigger you would have lost {sum(profit):.2f}$')
