@@ -5,27 +5,23 @@ import streamlit as st
 import requests
 
 st.image('../images/header.png')
-st.markdown("<h1 style='text-align: center; color: black;'> Welcome to the VIX buy or sell trigger</h1>",
-            unsafe_allow_html=True)
-
-st.markdown("<p style='text-align: center; color: black;'> The purpose of this program is to "
+st.markdown("<h1 style='text-align: center; color: black;'> Welcome to the VIX buy or sell trigger</h1>"
+            "</br>"
+            "<p style='text-align: center; color: black;'> The purpose of this program is to "
             "provide you, the stock trader, with a 'report' on the VIX index for possible buy & sell triggers based "
-            "on the Larry Connors 'CVR' reversal indicators.</p>",
-            unsafe_allow_html=True)
-
-st.markdown("<p style='text-align: center; color: black;'> This particular implementation examines "
+            "on the Larry Connors 'CVR' reversal indicators.</p>"
+            "<p style='text-align: center; color: black;'> This particular implementation examines "
             "the recent 15-period VIX daily high & low values and applies the following rules:</p>"
             "<li style='text-align: center; color: black;'> When the VIX index makes a NEW 15 day low "
             "AND closes ABOVE its open, it signals a sell</li>"
             "<li style='text-align: center; color: black;'> When the VIX index makes a NEW 15 high "
-            "low AND closes BELOW its open, it signals a buy</li>",
-            unsafe_allow_html=True)
-
-st.markdown("</br>"
+            "low AND closes BELOW its open, it signals a buy</li>"
+            "</br>"
             "<p style='text-align: center; color: black;'> It makes use of the yahoo stock quotes "
             "python library to scrape the necessary data from Yahoo Finance. "
             "The program will also provide you with a chart of the VIX index from the time period.</p>",
             unsafe_allow_html=True)
+
 
 COMMASPACE = ", "
 
@@ -35,7 +31,6 @@ SYMBOL = "VIX"
 # Number of days of historical data to fetch (not counting today)
 days_back = 15
 
-# T
 not_enough_data = False
 
 # Current datetime
@@ -149,10 +144,14 @@ newest_low = low[-1]
 
 
 def vix_trigger():
+    """
+    Checks to see if the data follows one of the two rules.
+    Returns an informative string and picture of the VIX index
+    """
     if not_enough_data:
         exit("Not enough historical data to compute an answer.\n"
              "Try again tomorrow")
-
+    # Initialize the buy & sell indicators
     buy, sell = False, False
 
     # If the current price is higher than the open and today is a new 15-day low, then this is a SELL indicator
@@ -163,6 +162,7 @@ def vix_trigger():
     if isCurrentLowerThanOpen(current, newest_open) & isNewHigh(newest_high, data):
         buy = True
 
+    # If one of the two indicators is True, print out the given text
     if buy | sell:
         if buy:
             st.markdown("<b style='text-align: center; color: black;'>Buy indicator triggered!<br/></b>",
@@ -181,11 +181,13 @@ def vix_trigger():
                      f"than the open ({newest_open:.2f})\n")
             st.markdown("<b style='text-align: center; color: black;'>=======> THIS IS A SELL INDICATOR</b>",
                         unsafe_allow_html=True)
+    # If neither of the indicators are True, print out the given text
     else:
         st.write("No trigger was activated.\n",
                  f"The current VIX index price is ({current}).\n"
                  "Check back tomorrow")
 
+    # Collect the image of the VIX index from stockcharts.com
     payload = {}
     headers = {"redirect_uri": "google.com", "User-Agent": "Mozilla/5.0"}
     r = requests.request("GET", chart_image_url, headers=headers, data=payload)
@@ -202,7 +204,11 @@ if result_1:
 
 
 def print_data_summary():
-    st.write(f"Data retrived from {start.date()} to {end.date()}")
+    """
+    Prints out a summary of the data used in the vix trigger function
+    Returns streamlit text of the data
+    """
+    st.write(f"Data retrieved from {start.date()} to {end.date()}")
     st.write(f"Current time is: {current_datetime}")
     st.write(f"Current hour is: {current_datetime.hour}")
     st.write(f"Current minute is: {current_datetime.minute}")
@@ -213,7 +219,7 @@ def print_data_summary():
     st.write(f"High price: {newest_high:.2f}")
     st.write(f"Low price: {newest_low:.2f}")
 
-
+# Button to run the data summary function
 result_2 = st.button("Click here to see the data used in the VIX trigger")
 if result_2:
     print_data_summary()
