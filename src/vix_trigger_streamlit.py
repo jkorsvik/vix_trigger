@@ -4,7 +4,7 @@ import yfinance as yf
 import streamlit as st
 import requests
 
-st.image('./images/header.png')
+st.image('../images/header.png')
 st.markdown("<h1 style='text-align: center; color: black;'> Welcome to the VIX buy or sell trigger</h1>"
             "</br>"
             "<p style='text-align: center; color: black;'> The purpose of this program is to "
@@ -223,3 +223,126 @@ def print_data_summary():
 result_2 = st.button("Click here to see the data used in the VIX trigger")
 if result_2:
     print_data_summary()
+
+
+def fomo_calc():
+    # Get data from user specified stock with an interval of user specified dates
+    ticker = yf.Ticker(stock)
+    stock_data = ticker.history(start=start, end=end)
+    stock_data.drop(labels=["Volume", "Dividends", "Stock Splits"], axis=1, inplace=True)
+    stock_data = stock_data.reset_index()
+
+    # The dictionary all closing prices will be stored for the user specified stock
+    stock_close = {}
+
+    # Filter out everything but the closing price from dates which contain buy or sell triggers
+    for key in buy_sell_dict:
+        stock_close[key] = stock_data.loc[stock_data.Date == key, ['Close']]
+    for key in stock_close:
+        stock_close[key] = stock_close[key]['Close']
+        stock_close[key] = float(stock_close[key])
+
+    # Specify which dates are buy trigger dates and which are sell trigger dates
+    buy_dates = []
+    sell_dates = []
+    for key in buy_sell_dict:
+        trigger = buy_sell_dict[key]
+        if trigger == 'Buy':
+            buy_dates.append(key)
+        else:
+            sell_dates.append(key)
+
+    # The portfolio in which the buy and sell price will be stored
+    portfolio = {'buy': None, 'sell': None, }
+    # A list to store all profits after each buy and sell
+    profit = []
+
+    # Go over all closing prices in the dictionary
+    for key in stock_close:
+        # If the date (key) is in the buy dates list and no buy or sell info is stored
+        if key in buy_dates and portfolio['buy'] is None and portfolio['sell'] is None:
+            # Add the price to the portfolio
+            portfolio['buy'] = stock_close[key]
+            # Used to check that you can not sell from dates before the buy
+            buy_year = int(key[0:4])
+            buy_month = int(key[5:7])
+            buy_day = int(key[8:10])
+        # If the date (key) is in the sell dates list and a buy is stored while sell is not
+        if key in sell_dates and portfolio['buy'] is not None and portfolio['sell'] is None:
+            # Used to check that you can not sell from dates before the buy
+            sell_year = int(key[0:4])
+            sell_month = int(key[5:7])
+            sell_day = int(key[8:10])
+            # If the sell year is larger or equal to the buy year
+            if sell_year >= buy_year:
+                # If the sell month is equal to buy month the day date must be larger
+                if sell_month == buy_month:
+                    if sell_day > buy_month:
+                        # Add the sell price to the portfolio
+                        portfolio['sell'] = stock_close[key]
+                # If the sell month is larger than tge buy month
+                if sell_month > buy_month:
+                    # Add the sell price to the portfolio
+                    portfolio['sell'] = stock_close[key]
+        #If the portfolio is full
+        if portfolio['buy'] is not None and portfolio['sell'] is not None:
+            # Compute the profit
+            profit.append((portfolio['sell'] - portfolio['buy']))
+            # Reset the portfolio
+            portfolio['buy'] = None
+            portfolio['sell'] = None
+
+    # Print out what the user could have made/lost if they followed the vix trigger
+
+    return sum(profit)
+
+
+buy_sell_dict_2019 = {'2019-01-15': 'Sell', '2019-01-16': 'Sell', '2019-02-12': 'Sell', '2019-02-21': 'Sell',
+                      '2019-02-25': 'Sell', '2019-03-04': 'Sell', '2019-03-08': 'Buy', '2019-03-14': 'Sell',
+                      '2019-03-19': 'Sell', '2019-04-17': 'Sell', '2019-05-09': 'Buy', '2019-06-20': 'Sell',
+                      '2019-07-05': 'Sell', '2019-07-25': 'Sell', '2019-08-02': 'Buy', '2019-11-05': 'Sell'}
+
+buy_sell_dict_2020 = {'2020-02-28': 'Buy', '2020-03-06': 'Buy', '2020-03-13': 'Buy', '2020-03-17': 'Buy',
+                      '2020-04-28': 'Sell', '2020-05-12': 'Sell', '2020-06-12': 'Buy', '2020-06-15': 'Buy',
+                      '2020-07-21': 'Sell', '2020-07-23': 'Sell', '2020-08-11': 'Sell', '2020-09-04': 'Buy',
+                      '2020-10-29': 'Buy', '2020-11-09': 'Sell', '2020-11-18': 'Sell'}
+
+buy_sell_dict_2021 = {'2021-01-29': 'Buy', '2021-02-09': 'Sell', '2021-02-10': 'Sell', '2021-03-18': 'Sell',
+                      '2021-03-23': 'Sell', '2021-04-08': 'Sell', '2021-04-14': 'Sell', '2021-05-13': 'Buy',
+                      '2021-06-01': 'Sell', '2021-06-08': 'Sell', '2021-06-14': 'Sell'}
+
+stock = st.text_input('Choose your stock. Must be the stock ticker')
+st.write('See what you could have made if you followed the vix index trigger')
+trigger_2019 = st.button('From 01.01.2019 - 31.12.2019')
+trigger_2020 = st.button('From 01.01.2020 - 31.12.2020')
+trigger_2021 = st.button('From 01.01.2021 - 17.06.2021')
+
+if trigger_2019:
+    buy_sell_dict = buy_sell_dict_2019
+    start = '2019-01-01'
+    end = '2019-12-31'
+    result_3 = fomo_calc()
+    if result_3 > 0:
+        st.write(f'If you followed the VIX index trigger you would have made {result_3:.2f}$')
+    else:
+        st.write(f'If you followed the VIX index trigger you would have lost {result_3:.2f}$')
+
+elif trigger_2020:
+    buy_sell_dict = buy_sell_dict_2020
+    start = '2020-01-01'
+    end = '2020-12-31'
+    result_3 = fomo_calc()
+    if result_3 > 0:
+        st.write(f'If you followed the VIX index trigger you would have made {result_3:.2f}$')
+    else:
+        st.write(f'If you followed the VIX index trigger you would have lost {result_3:.2f}$')
+
+elif trigger_2021:
+    buy_sell_dict = buy_sell_dict_2021
+    start = '2021-01-01'
+    end = '2021-06-17'
+    result_3 = fomo_calc()
+    if result_3 > 0:
+        st.write(f'If you followed the VIX index trigger you would have made {result_3:.2f}$')
+    else:
+        st.write(f'If you followed the VIX index trigger you would have lost {result_3:.2f}$')
