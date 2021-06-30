@@ -4,7 +4,7 @@ import yfinance as yf
 import streamlit as st
 import requests
 
-st.image('../images/header.png')
+st.image('images/header.png')
 st.markdown("<h1 style='text-align: center; color: black;'> Welcome to the VIX buy or sell trigger</h1>"
             "</br>"
             "<p style='text-align: center; color: black;'> The purpose of this program is to "
