@@ -11,6 +11,15 @@ It makes use of the yahoo stock quotes python library to scrape the necessary da
 The script will create a URL for the specific chart from stockcharts.com linked to an in-line image of the same chart and sent in an email.
 
 The script is intended to be every weekday at 4:15pm ET
+## Getting started
+To get started, make sure you have python 3 installed. 
+Install the required packaged either with conda, or with pip.
+conda:
+```bash
+conda env create -f environment.yml
+
+```
+
 
 
 ## Example output
