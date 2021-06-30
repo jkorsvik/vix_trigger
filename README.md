@@ -17,9 +17,15 @@ Install the required packaged either with conda, or with pip.
 conda:
 ```bash
 conda env create -f environment.yml
-
 ```
-
+pip:
+```bash
+python3 -m pip install -r requirements.txt
+```
+To run the streamlit version of the app, run the command:
+```
+streamlit run src/vix_trigger_streamlit.py 
+```
 
 
 ## Example output
