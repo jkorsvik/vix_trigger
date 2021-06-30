@@ -1,0 +1,8 @@
+name: vix-env
+dependencies:
+- python>=3.8
+- anaconda
+- pandas>=1.2.5
+- pip:
+  - yfinance>=0.1.59
+  - streamlit>=0.83.0
