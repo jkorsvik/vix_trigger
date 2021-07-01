@@ -13,12 +13,14 @@ The script will create a URL for the specific chart from stockcharts.com linked 
 The script is intended to be every weekday at 4:15pm ET
 ## Getting started
 To get started, make sure you have python 3 installed. 
-Install the required packaged either with conda, or with pip.
-conda:
+Install the required packaged either with conda, or with pip.  
+### Setup with Conda:
+Run the command:
 ```bash
 conda env create -f environment.yml
 ```
-pip:
+### Setup with pip:
+Run the command:
 ```bash
 python3 -m pip install -r requirements.txt
 ```
