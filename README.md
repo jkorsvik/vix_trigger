@@ -1,41 +1,49 @@
-# Purpose
-The purpose of this script is to provide a daily 'report' on the VIX index for possible buy & sell triggers based on the _Larry Connors 'CVR' reversal indicators_.
+# TIN200: VIX calculator
 
-This particular implementation examines the recent 15-period VIX daily high & low values and applies the following rules:
+The purpose of this repository is to to provide an example of using streamlit to the students.
 
-* When the VIX index makes a NEW 15 day low AND closes ABOVE its open, it signals a sell in the market
-* When the VIX index makes a NEW 15 high low AND closes BELOW its open, it signals a buy in the market
+## Introduction
 
-It makes use of the yahoo stock quotes python library to scrape the necessary data from the Yahoo Finance information (is intended to be run at 4:15pm ET in order to ensure close-of-market data is collected)
+The source code uses Yahoo Finance to get the vix prices.  
+After fetching the data, we calculate whetever today is day where the user should buy, sell, or do nothing.
+This is then presented to the user using [streamlit](https://streamlit.io/)
 
-The script will create a URL for the specific chart from stockcharts.com linked to an in-line image of the same chart and sent in an email.
-
-The script is intended to be every weekday at 4:15pm ET
 ## Getting started
-To get started, make sure you have python 3 installed. 
-Install the required packaged either with conda, or with pip.  
-### Setup with Conda:
+
+To get started, make sure you have python 3 installed.
+Install the required packaged either with conda, or with pip.
+
+### Setup with Conda
+
 Run the command:
+
 ```bash
 conda env create -f environment.yml
 ```
-### Setup with pip:
+
+### Setup with pip
+
 Run the command:
+
 ```bash
 python3 -m pip install -r requirements.txt
 ```
-To run the streamlit version of the app, run the command:
-```
-streamlit run src/vix_trigger_streamlit.py 
-```
 
+## Running the code
+
+Enter the folder where you have downloaded the code, and open a terminal in the current folder. For a guide, take a look at the following guide: https://www.groovypost.com/howto/open-command-window-terminal-window-specific-folder-windows-mac-linux/
+
+To run the streamlit version of the app, run the command:
+
+```bash
+streamlit run src/vix_trigger_streamlit.py
+```
 
 ## Example output
+
 Normal example:
 
 ![](https://raw.githubusercontent.com/billimek/vix_trigger/master/images/daily_vix_normal.png)
-
-
 
 Sell indicator example:
 
