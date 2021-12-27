@@ -47,6 +47,11 @@ To run the streamlit version of the app, run the command:
 ```bash
 streamlit run src/vix_trigger_streamlit.py
 ```
+if you used conda, you need to enter your environment by doing the following:
+
+```bash
+conda activate vix-env
+```
 
 ## Example output
 
