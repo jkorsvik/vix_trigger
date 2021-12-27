@@ -11,7 +11,7 @@ The library enables us to get stock data from Yahoos publicly available APIs.
 
 To read more about yfinance, head to https://aroussi.com/post/python-yahoo-finance
 
-After fetching the data, we calculate whetever today is day where the user should buy, sell, or do nothing.
+After fetching the data, we calculate whetever today is day when the user should either buy, sell, or do nothing.
 
 This is then presented to the user using [streamlit](https://streamlit.io/)
 
