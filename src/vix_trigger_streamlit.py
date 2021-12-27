@@ -195,13 +195,19 @@ def vix_trigger():
     payload = {}
     headers = {"redirect_uri": "google.com", "User-Agent": "Mozilla/5.0"}
     r = requests.request("GET", chart_image_url, headers=headers, data=payload)
+    _,_, center_image = st.columns([1,1,1])
+
     with open("image.png", "wb") as file:
         file.write(r.content)
     chart_image = r.content
-    st.image(chart_image)
+    center_image.image(chart_image, use_column_width=True)
+
+
+
+col1, col2 = st.columns([1,1])
 
 # Button to run the VIX trigger
-result_1 = st.button("Click here to see if you should buy or sell today")
+result_1 = col1.button("Click here to see if you should buy or sell today")
 if result_1:
     vix_trigger()
 
@@ -223,7 +229,7 @@ def print_data_summary():
     st.write(f"Low price: {newest_low:.2f}")
 
 # Button to run the data summary function
-result_2 = st.button("Click here to see the data used in the VIX trigger")
+result_2 = col2.button("Click here to see the data used in the VIX trigger")
 if result_2:
     print_data_summary()
 

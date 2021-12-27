@@ -4,9 +4,13 @@ The purpose of this repository is to to provide an example of using streamlit to
 
 ## Introduction
 
-The source code uses Yahoo Finance to get the vix prices.  
+The source code uses Yahoo Finance to get the vix prices.
+
 After fetching the data, we calculate whetever today is day where the user should buy, sell, or do nothing.
+
 This is then presented to the user using [streamlit](https://streamlit.io/)
+
+![Image over the flow of data](./images/diagram.png)
 
 ## Getting started
 
@@ -43,8 +47,8 @@ streamlit run src/vix_trigger_streamlit.py
 
 Normal example:
 
-![](https://raw.githubusercontent.com/billimek/vix_trigger/master/images/daily_vix_normal.png)
+![Example of how a lack of indicator looks like when presented to the use](https://raw.githubusercontent.com/billimek/vix_trigger/master/images/daily_vix_normal.png)
 
 Sell indicator example:
 
-![](https://raw.githubusercontent.com/billimek/vix_trigger/master/images/sell_trigger_example.png)
+![Example of how the sell indicator looks like when presented to the use](https://raw.githubusercontent.com/billimek/vix_trigger/master/images/sell_trigger_example.png)
