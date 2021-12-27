@@ -42,17 +42,17 @@ python3 -m pip install -r requirements.txt
 
 Enter the folder where you have downloaded the code, and open a terminal in the current folder. For a guide, take a look at the following guide: https://www.groovypost.com/howto/open-command-window-terminal-window-specific-folder-windows-mac-linux/
 
+
+NOTE: In Windows, you might have to use the anaconda prompt instead of the 
+command prompt or powershell.
+
 To run the streamlit version of the app, run the command:
 
-```bash
-streamlit run src/vix_trigger_streamlit.py
-```
-if you used conda, you need to enter your environment by doing the following:
+If you used conda, you need to enter your environment by doing the following:
 
 ```bash
 conda activate vix-env
 ```
-
 ## Example output
 
 Normal example:
