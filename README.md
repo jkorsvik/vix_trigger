@@ -1,4 +1,4 @@
-# TIN200: VIX calculator
+# VIX calculator
 
 The purpose of this repository is to to provide an example of using streamlit to the students.
 
