@@ -3,24 +3,33 @@ import datetime
 import yfinance as yf
 import streamlit as st
 import requests
+import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from stockstats import StockDataFrame
+import yfinanceScraper 
+import ticker_manager
+import model
 
 st.image('images/header.png')
-st.markdown("<h1 style='text-align: center; color: black;'> Welcome to the VIX buy or sell trigger</h1>"
-            "</br>"
-            "<p style='text-align: center; color: black;'> The purpose of this program is to "
-            "provide you, the stock trader, with a 'report' on the VIX index for possible buy & sell triggers based "
-            "on the Larry Connors 'CVR' reversal indicators.</p>"
-            "<p style='text-align: center; color: black;'> This particular implementation examines "
-            "the recent 15-period VIX daily high & low values and applies the following rules:</p>"
-            "<li style='text-align: center; color: black;'> When the VIX index makes a NEW 15 day low "
-            "AND closes ABOVE its open, it signals a sell</li>"
-            "<li style='text-align: center; color: black;'> When the VIX index makes a NEW 15 high "
-            "low AND closes BELOW its open, it signals a buy</li>"
-            "</br>"
-            "<p style='text-align: center; color: black;'> It makes use of the yahoo stock quotes "
-            "python library to scrape the necessary data from Yahoo Finance. "
-            "The program will also provide you with a chart of the VIX index from the time period.</p>",
-            unsafe_allow_html=True)
+st.markdown(""" # Welcome to the VIX buy or sell trigger
+
+The purpose of this program is to provide you, the stock trader, with a 'report' on the VIX index for 
+possible buy & sell triggers based on the Larry Connors 'CVR' reversal indicators.
+
+This particular implementation examines the recent 15-period VIX daily high & low values 
+and applies the following rules:
+
+- When the VIX index makes a NEW 15 day low AND closes ABOVE its open, it signals a sell
+- When the VIX index makes a NEW 15 high low AND closes BELOW its open, it signals a buy
+
+The program will Further
+
+It makes use of the yahoo stock quotes python library to scrape the necessary data from Yahoo Finance. 
+The program will also provide you with a chart of the VIX index from the time period as an interactive candleplot.
+Volume is included in the chart, but as a random number just to show more info on the chart.
+"""
+)
 
 COMMASPACE = ", "
 
@@ -28,23 +37,71 @@ COMMASPACE = ", "
 SYMBOL = "VIX"
 
 # Number of days of historical data to fetch (not counting today)
-days_back = 15
+days_back = st.sidebar.slider('Number of days in graph', 15, 365, 15)
 
 not_enough_data = False
 
 # Current datetime
 current_datetime = datetime.datetime.now()
+data_dict = {}
+st.sidebar.write("What Tickers do you want to use?")
 
-# URL to VIX chart image
-chart_image_url = (
-        "http://stockcharts.com/c-sc/sc?s="
-        + "$"
-        + SYMBOL
-        + "&p=D&yr=0&mn=0&dy="
-        + str(days_back)
-        + "&id=p87197006241"
-)
+for ticker in ticker_manager.Ticker:
+    if ticker == ticker_manager.Ticker.VIX:
+        store = st.sidebar.checkbox(f"{ticker.name}", value=True)
+    else:
+        store = st.sidebar.checkbox(f"{ticker.name}")
+    if store:
+        data_dict[ticker.name] = yfinanceScraper.Scraper(ticker=ticker.value, n_days=days_back)
 
+
+options = st.sidebar.multiselect(
+     "Which tickers would you like to display?",
+     data_dict.keys())
+
+#st.sidebar.write('You selected:', options)
+
+
+def create_candleplot(scraper):
+    df = scraper.historic_data
+    st.write(f"**{scraper.name} Candlestick Chart**")
+    fig = make_subplots(rows=2, cols=1, row_heights=[1, 0.2], vertical_spacing=0)
+
+    fig.add_trace(go.Candlestick(x=df['datetime'],
+                                         open=df['open'],
+                                         high=df['high'],
+                                         low=df['low'],
+                                         close=df['close'],
+                                increasing_line_color='#0384fc', decreasing_line_color='#e8482c', name=scraper.name), row=1, col=1)
+
+    fig.add_trace(go.Scatter(x=df['datetime'], y=np.random.randint(20, 40, len(df)), marker_color='#fae823', name='VO', hovertemplate=[]), row=2, col=1)
+
+    fig.update_layout({'plot_bgcolor': "#21201f", 'paper_bgcolor': "#21201f", 'legend_orientation': "h"},
+                    legend=dict(y=1, x=0),
+                    font=dict(color='#dedddc'), dragmode='pan', hovermode='x unified',
+                    margin=dict(b=21, t=1, l=1, r=40))
+
+    fig.update_yaxes(showgrid=False, zeroline=False, showticklabels=True,
+                    showspikes=True, spikemode='across', spikesnap='cursor', showline=False, spikedash='solid')
+
+    fig.update_xaxes(showgrid=False, zeroline=False, rangeslider_visible=False, showticklabels=True,
+                    showspikes=True, spikemode='across', spikesnap='cursor', showline=False, spikedash='solid')
+
+    fig.update_layout(hoverdistance=1)
+
+    fig.update_traces(xaxis='x')  
+                                  
+    st.plotly_chart(fig)
+
+# create a streamlit box for candleplot
+def async_streamlit_candleplot(ticker, data):
+    """
+    Creates a streamlit box for the candleplot
+    Parameters:
+    data (list): All price data for the VIX index 15 days back
+    """
+    st.subheader(f"{ticker} Candlestick Chart")
+    create_candleplot(data)
 
 def isNewHigh(high, data):
     """
@@ -105,31 +162,25 @@ def isCurrentLowerThanOpen(current, today_open):
 # Yesterday's date
 end = current_datetime - datetime.timedelta(days=1)
 # 30 days ago from today
-start = current_datetime - datetime.timedelta(days=30)
+start = current_datetime - datetime.timedelta(days=days_back)
 
 # Retrieve historical data from the VIX index via Yahoo's API
 vix = yf.Ticker(f"^{SYMBOL}")
 data = vix.history(start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d"))
-drop_cols = ["Volume", "Dividends", "Stock Splits"]
+drop_cols = ["Dividends", "Stock Splits"]
 for col in drop_cols:
     try:
         data.drop(col, axis=1, inplace=True)
     except:
         pass
 index = data.columns
-data = data.reset_index().drop("Date", axis=1)
+data = data.reset_index()
 data = data.to_dict("list")
 
-# Collect all data ones more for one month
+# Collect all data once more for one month
 all_data = vix.history(period="1mo", interval="1d")
+#print(all_data)
 
-# Validate that we have enough historical data to continue
-if len(data['Open']) < days_back:
-    not_enough_data = True
-    st.markdown("<h3 style='text-align: center; color: red;'>Not enough historical data "
-                "available to continue (need at least 15 days of market data). "
-                "Try again tomorrow</h3>",unsafe_allow_html=True
-    )
 
 current = vix.info
 current = current.get("regularMarketPrice")
@@ -192,15 +243,9 @@ def vix_trigger():
                  "Check back tomorrow")
 
     # Collect the image of the VIX index from stockcharts.com
-    payload = {}
-    headers = {"redirect_uri": "google.com", "User-Agent": "Mozilla/5.0"}
-    r = requests.request("GET", chart_image_url, headers=headers, data=payload)
-    _,_, center_image = st.columns([1,1,1])
-
-    with open("image.png", "wb") as file:
-        file.write(r.content)
-    chart_image = r.content
-    center_image.image(chart_image, use_column_width=True)
+    for ticker in options:
+        print(ticker)
+        create_candleplot(data_dict[ticker])
 
 
 
