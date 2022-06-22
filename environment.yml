@@ -9,3 +9,6 @@ dependencies:
       - plotly
       - statsmodels
       - stockstats
+      - numpy
+      - keras
+      - tensorflow
