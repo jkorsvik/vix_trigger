@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 import streamlit as st
 import yfinanceScraper 
 import ticker_manager
-import model
+import model as model_util
 import matplotlib.pyplot as plt
 import pandas as pd
 import vix_trigger_only
@@ -170,16 +170,16 @@ if use_machine_learning_to_pred:
 
         train_data, test_data, total_data = df[0:int(len(df)*0.7)], df[int(len(df)*0.7):], df
 
-        X_train, y_train, sc, sc_target = model.preproccess(train_data, predictor_col_ind, steps=stepsize)
+        X_train, y_train, sc, sc_target = model_util.preproccess(train_data, predictor_col_ind, steps=stepsize)
         inputs = total_data.iloc[len(total_data) - len(test_data) - stepsize:]
         print(inputs.shape)
         with st.spinner('Training model'):
-            lstm = model.model_build_and_fit(X_train, y_train)
+            lstm = model_util.model_build_and_fit(X_train, y_train)
 
         
 
 
-        X_test = model.preproccess_inference(inputs, steps=stepsize, sc=sc)
+        X_test = model_util.preproccess_inference(inputs, steps=stepsize, sc=sc)
 
         predicted_stock_price = lstm.predict(X_test)
         mse = lstm.evaluate(X_train, y_train)
