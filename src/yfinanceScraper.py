@@ -10,7 +10,15 @@ class Scraper:
     def __init__(self, ticker="^VIX", n_days=30):
         self.name = ticker
         self.ticker = yf.Ticker(f"{ticker}")
-        self.historic_data = self.get_historic_data(ticker=self.ticker, n_days=n_days)
+        self._historic_data = None
+        self._ndays = n_days
+
+    @property
+    def historic_data(self):
+        if self._historic_data is None:
+            return self.get_historic_data(ticker=self.ticker, n_days=self._ndays)
+        else:
+            return self._historic_data
 
     def get_json(self, ticker_str=None, n_days=30):
         """Return json from desired dataframe"""
@@ -79,7 +87,7 @@ class Scraper:
         # Return the results
         if api:
             return {
-                "recommendation": {f"Recommendations: \n{buy=} \n{sell=}"},
+                "recommendation": {f"Recommendations: {buy=} {sell=}"},
                 "new_low": f"{new_low}",
                 "new_high": f"{new_high}",
                 "up_today": f"{up_today}",
